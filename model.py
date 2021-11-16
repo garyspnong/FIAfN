@@ -135,11 +135,11 @@ class FIAfN():
         with tf.name_scope("movie_title_dropout"):
             lstm_cell_dropout = tf.nn.rnn_cell.DropoutWrapper(lstm_cell, output_keep_prob=dropout_keep_prob)
     
-            # 根据输入动态决定对应的batch_size大小
+            #The corresponding batch_size is dynamically determined according to the input
             batch_size_ = tf.shape(title_index)[0]
             init_state = lstm_cell_dropout.zero_state(batch_size_, dtype=tf.float32)
     
-        # 步长根据标题长度动态变化，dynamic_rnn会将填充长度输出置为0
+        #The step size changes dynamically according to the length of the title, and the dynamic_rnn function sets the output of fill part to 0
         
         
         lstm_output, final_state = tf.nn.dynamic_rnn(lstm_cell_dropout,
@@ -147,7 +147,7 @@ class FIAfN():
                                                      sequence_length=title_length,
                                                      initial_state=init_state,
                                                      scope='movie_title_rnn')
-        # 根据标题长度计算平均值，除数是标题的真实长度
+        #The average value is calculated according to the title length, and the divisor is the real length of the title
         with tf.name_scope('movie_title_avg_pool'):
             lstm_output = tf.reduce_sum(lstm_output, 1) / title_length[:, None]
     
@@ -199,7 +199,7 @@ class FIAfN():
             genre_value = tf.reshape(self.genre_value, shape=[-1, 6, 1])
             self.embeddings_m  = tf.multiply(self.embeddings_m, genre_value)
             self.embeddings_m = tf.reduce_sum(self.embeddings_m, axis=1) # None * d 
-            self.embeddings_m = tf.div(self.embeddings_m, tf.reduce_sum(self.genre_value, axis=1, keep_dims=True)) #求平均 None * d
+            self.embeddings_m = tf.div(self.embeddings_m, tf.reduce_sum(self.genre_value, axis=1, keep_dims=True)) # Average None * d
             
             #concatenate single-value field with multi-value field
             self.embeddings = tf.concat([self.embeddings, tf.expand_dims(self.embeddings_m, 1)], 1) # None * 7 * d
